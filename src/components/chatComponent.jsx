@@ -97,6 +97,7 @@ const ChatComponent = () => {
         localStorage.removeItem('token')
         localStorage.removeItem('contact')
         localStorage.removeItem('instance')
+        navigate(LOGIN_URL)
     }
 
 
