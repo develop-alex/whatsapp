@@ -93,6 +93,12 @@ const ChatComponent = () => {
         }
     }, [parse, message])
 
+    const exit = () => {
+        localStorage.removeItem('token')
+        localStorage.removeItem('contact')
+        localStorage.removeItem('instance')
+    }
+
 
     if (loading){
         return <Loader/>
@@ -110,7 +116,12 @@ const ChatComponent = () => {
             :
             <>
                 <UsersBar>
-                    <UserComponent>{myPhone}</UserComponent>
+                    <UserComponent>
+                        <div className='flex ai_center jc_between'>
+                            {myPhone}
+                            <Input type='submit' value='Выйти' onClick={exit}/>
+                        </div>
+                    </UserComponent>
                 </UsersBar>
                 <ChatBar>
                     <UserDataComponent>{localStorage.getItem('contact')}</UserDataComponent>
