@@ -24,11 +24,10 @@ const ChatComponent = () => {
     const [myPhone, setMyPhone] = React.useState('');
     const [phone, setPhone] = React.useState('');
     const [addedPhone, setAddedPhone] = React.useState(false);
+    const [parse, setParse] = React.useState(true);
     const state = useAuth();
     const navigate = useNavigate();
     const [messageInput, setMessageInput] = React.useState('');
-    const [idMessage, setIdMessage] = React.useState('');
-    const [parse, setParse] = React.useState(true);
 
     React.useEffect(() => {
         GetSettings(localStorage.getItem('instance'), localStorage.getItem('token'))
@@ -63,60 +62,36 @@ const ChatComponent = () => {
     const send = async e => {
         if (e.keyCode === 13){
             setParse(false)
-
-            SendMessage(
-                localStorage.getItem('instance'),
-                localStorage.getItem('token'),
-                localStorage.getItem('contact') + '@c.us',
-                messageInput)
-                .then(data => {
-                    setIdMessage(data.idMessage)
-                    ReceiveNotification(localStorage.getItem('instance'), localStorage.getItem('token')).then(data => {
-                        if (data.data?.body?.senderData?.chatId === localStorage.getItem('contact') + '@c.us'){
-                            setIdMessage('')
-                            setMessageInput('')
-                            message.setMessages({id: data?.data?.body?.idMessage, message: data?.data?.body?.messageData?.extendedTextMessageData?.text})
-                            console.log(message.isMessages)
-                            DeleteNotification(localStorage.getItem('instance'), localStorage.getItem('token'), data?.data?.receiptId)
-                                .then(data => {
-                                    if (data){
-                                        setParse(true)
-                                    }
-                                })
-                        }
-                    })
+            SendMessage(localStorage.getItem('instance'), localStorage.getItem('token'), localStorage.getItem('contact') + '@c.us', messageInput)
+                .then(() => {
+                    setMessageInput('');
+                    setParse(true);
                 })
         }
     }
 
     React.useEffect(() => {
-        if (parse){
-            if (!idMessage) {
-                setParse(false)
-                ReceiveNotification(localStorage.getItem('instance'), localStorage.getItem('token')).then(data => {
-                    if (data.data?.body?.senderData?.chatId === localStorage.getItem('contact') + '@c.us'){
-                        message.setMessages({id: data?.data?.body?.idMessage, message: data?.data?.body?.messageData?.textMessageData?.textMessage, type: 'user'})
-                        DeleteNotification(localStorage.getItem('instance'), localStorage.getItem('token'), data?.data?.receiptId)
-                            .then(data => {
-                                if(data){
-                                    setParse(true)
-                                }
-                            })
-                    } else {
-                        DeleteNotification(localStorage.getItem('instance'), localStorage.getItem('token'), data?.data?.receiptId)
-                            .then(data => {
-                                if(data){
-                                    setParse(true)
-                                }
-                            })
-                            .catch(() => setParse(true))
+        if (parse) {
+            setParse(false)
+            const getNotification = async () => {
+                const {data} = await ReceiveNotification(localStorage.getItem('instance'), localStorage.getItem('token'))
+                if (data) {
+                    await DeleteNotification(localStorage.getItem('instance'), localStorage.getItem('token'), Number(data.receiptId))
+                    if (data.body.messageData.typeMessage === 'textMessage'){
+                        if (data.body?.senderData?.chatId === localStorage.getItem('contact') + '@c.us'){
+                            message.setMessages({id: data?.body?.idMessage, message: data?.body?.messageData?.textMessageData?.textMessage, type: 'user'})
                         }
-                    })
-                console.log('parsing')
+                    } else if (data.body.messageData.typeMessage === 'extendedTextMessage'){
+                        if (data?.body?.senderData?.chatId === localStorage.getItem('contact') + '@c.us'){
+                            message.setMessages({id: data?.body?.idMessage, message: data?.body?.messageData?.extendedTextMessageData?.text})
+                        }
+                    }
+                }
+                setParse(true)
             }
+            getNotification()
         }
-        console.log('stop parsing')
-    }, [parse, idMessage, message])
+    }, [parse, message])
 
 
     if (loading){
