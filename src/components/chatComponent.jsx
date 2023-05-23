@@ -75,8 +75,7 @@ const ChatComponent = () => {
             setParse(false)
             const getNotification = async () => {
                 const {data} = await ReceiveNotification(localStorage.getItem('instance'), localStorage.getItem('token'))
-                if (data) {
-                    await DeleteNotification(localStorage.getItem('instance'), localStorage.getItem('token'), Number(data.receiptId))
+                if (data){
                     if (data.body.messageData.typeMessage === 'textMessage'){
                         if (data.body?.senderData?.chatId === localStorage.getItem('contact') + '@c.us'){
                             message.setMessages({id: data?.body?.idMessage, message: data?.body?.messageData?.textMessageData?.textMessage, type: 'user'})
@@ -86,6 +85,7 @@ const ChatComponent = () => {
                             message.setMessages({id: data?.body?.idMessage, message: data?.body?.messageData?.extendedTextMessageData?.text})
                         }
                     }
+                    await DeleteNotification(localStorage.getItem('instance'), localStorage.getItem('token'), Number(data.receiptId))
                 }
                 setParse(true)
             }
