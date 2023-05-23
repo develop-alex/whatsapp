@@ -1,0 +1,33 @@
+@use "../../constants.sass"
+
+.input
+  margin-bottom: 18px
+
+  label
+    cursor: pointer
+    display: block
+    margin-bottom: 6px
+
+  input
+    background: constants.$inputColor
+    width: 100%
+    display: block
+    padding: 16px
+    border: none
+    &[type='submit']
+      background: constants.$buttonColor
+      cursor: pointer
+      color: constants.$whiteColor
+      font-weight: 600
+      transition: background-color .3s ease-in-out
+      &:hover
+        background-color: constants.$buttonHoverColor
+    &::placeholder
+      color: constants.$placeholderColor
+    &:disabled
+      cursor: default
+      background: constants.$bgColor
+      &:hover
+        background: constants.$bgColor
+  &:last-child
+    margin-bottom: 0
